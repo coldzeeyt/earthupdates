@@ -157,6 +157,11 @@
       <div id="draft-list" class="draft-list"></div>
 
       <div class="admin-publish">
+        <div class="admin-row">
+          <label for="f-version">Version (this publish becomes)</label>
+          <input type="text" id="f-version" placeholder="e.g. v1.0.1" autocomplete="off">
+          <p class="admin-note">Pre-filled with the next version, but you can type anything — it just has to be unique.</p>
+        </div>
         <button type="button" class="btn btn-primary btn-block" id="publish-live">Publish Live</button>
         <button type="button" class="btn btn-ghost btn-block" id="save-local">Save Draft to This Browser Only</button>
         <p class="admin-status" id="admin-status"></p>

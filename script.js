@@ -308,8 +308,16 @@ async function deleteVersion(version) {
   }
 }
 
+function suggestNextVersion(v) {
+  const match = /^v(\d+)\.(\d+)\.(\d+)$/.exec(v || "");
+  if (!match) return "v1.0.1";
+  const [, maj, min, build] = match;
+  return `v${maj}.${min}.${Number(build) + 1}`;
+}
+
 async function publishLive() {
   const status = document.getElementById("admin-status");
+  const versionInput = document.getElementById("f-version");
   if (!pendingEntries.length) { status.textContent = "Add at least one entry first."; return; }
 
   status.textContent = "Publishing…";
@@ -317,7 +325,7 @@ async function publishLive() {
     const res = await fetch(`${BACKEND_URL}/api/publish`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passcode: adminPasscode, entries: pendingEntries }),
+      body: JSON.stringify({ passcode: adminPasscode, entries: pendingEntries, version: versionInput.value.trim() }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Publish failed (HTTP ${res.status})`);
@@ -326,6 +334,7 @@ async function publishLive() {
     renderDraftList();
     await loadPatchGroups();
     renderManageList();
+    versionInput.value = suggestNextVersion(liveGroups[0] && liveGroups[0].version);
   } catch (err) {
     status.textContent = `Error: ${err.message}`;
   }
@@ -370,6 +379,7 @@ function setupAdmin() {
       pendingEntries = [];
       renderDraftList();
       renderManageList();
+      document.getElementById("f-version").value = suggestNextVersion(liveGroups[0] && liveGroups[0].version);
     } else {
       errorEl.textContent = "Incorrect passcode.";
       passInput.value = "";

@@ -150,11 +150,17 @@ app.post("/api/publish", async (req, res) => {
   try {
     const entries = sanitizeEntries(req.body.entries);
     const { current, sha } = await fetchLiveFile();
-    const nextVersion = bumpVersion(current[0] && current[0].version);
+
+    const requestedVersion = String((req.body && req.body.version) || "").trim().slice(0, 40);
+    let version = requestedVersion || bumpVersion(current[0] && current[0].version);
+    if (current.some(g => g.version === version)) {
+      throw new Error(`Version "${version}" already exists. Pick a different one.`);
+    }
+
     const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    const updated = [{ version: nextVersion, date: today, entries }, ...current];
-    await putLiveFile(`Add patch notes: ${nextVersion}`, sha, updated);
-    res.json({ ok: true, version: nextVersion });
+    const updated = [{ version, date: today, entries }, ...current];
+    await putLiveFile(`Add patch notes: ${version}`, sha, updated);
+    res.json({ ok: true, version });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
