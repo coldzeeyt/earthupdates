@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EARTH — Patch Notes</title>
+<meta name="description" content="Official changelog for planet Earth. Buffs, nerfs, bug fixes and new content, patch by patch.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="noise"></div>
+<div class="scanline"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">🌍</span>
+      <span class="brand-text">EARTH<span class="brand-sub">™</span></span>
+    </div>
+    <nav class="topnav">
+      <a href="#patches" class="active">Changelog</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#known-issues">Known Issues</a>
+      <a href="#stats">Server Status</a>
+    </nav>
+    <div class="version-pill" id="live-version">v6.2.1044</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">LIVE SERVICE &middot; BUILD <span id="build-number">6.2.1044</span></div>
+    <h1>EARTH</h1>
+    <p class="hero-sub">Development Changelog</p>
+    <p class="hero-desc">Tracking every buff, nerf, hotfix and questionable balance decision shipped to the live planet. No maintenance windows. No rollbacks. Patches are permanent.</p>
+    <div class="hero-actions">
+      <a href="#patches" class="btn btn-primary">View Patch Notes ↓</a>
+      <a href="#stats" class="btn btn-ghost">Server Status</a>
+    </div>
+  </div>
+  <div class="ticker">
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
+</section>
+
+<section class="stats" id="stats">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="stat-value" data-target="8231958201">0</div>
+      <div class="stat-label">Active Players</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" data-target="1044">0</div>
+      <div class="stat-label">Patches Shipped</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" data-target="4543000000">0</div>
+      <div class="stat-label">Server Uptime (yrs)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" data-target="99">0</div>
+      <div class="stat-label" data-suffix="%">Uptime SLA</div>
+    </div>
+  </div>
+  <div class="server-status">
+    <span class="dot dot-green"></span> All regions operational &middot; Axial tilt nominal &middot; No wipe scheduled
+  </div>
+</section>
+
+<section class="filters" id="patches">
+  <h2 class="section-title">Patch History</h2>
+  <p class="section-sub">Filter by change type. New entries pushed continuously — no downtime required.</p>
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="buff">🟢 Buff</button>
+    <button class="filter-btn" data-filter="nerf">🔴 Nerf</button>
+    <button class="filter-btn" data-filter="new">🔵 New</button>
+    <button class="filter-btn" data-filter="fix">🟡 Fix</button>
+    <button class="filter-btn" data-filter="removed">⚫ Removed</button>
+    <button class="filter-btn" data-filter="event">🟣 Event</button>
+  </div>
+</section>
+
+<main class="patch-list" id="patch-list"></main>
+
+<section class="roadmap" id="roadmap">
+  <h2 class="section-title">Roadmap</h2>
+  <p class="section-sub">What's cooking for future builds. Subject to change without notice, as always.</p>
+  <div class="roadmap-grid" id="roadmap-grid"></div>
+</section>
+
+<section class="known-issues" id="known-issues">
+  <h2 class="section-title">Known Issues</h2>
+  <p class="section-sub">Logged, acknowledged, not currently prioritized.</p>
+  <ul class="issues-list" id="issues-list"></ul>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">🌍 EARTH<span class="brand-sub">™</span></div>
+    <p>Earth Studios — a subsidiary of nobody in particular. Not responsible for emergent behavior, unpatched exploits, or extinction-tier balance changes. All uptime figures self-reported.</p>
+    <p class="footer-meta">Build <span id="footer-build">6.2.1044</span> &middot; Region: Sol-3 &middot; No refunds.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
