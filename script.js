@@ -8,31 +8,30 @@ const ICONS = {
 };
 
 // Repo this admin panel publishes to. Only used to build the GitHub API
-// URL for the "publish live" action below — never sent anywhere else.
+// URL for the "publish live" / "delete version" actions below — never
+// sent anywhere else.
 const REPO = "coldzeeyt/earthupdates";
 const DATA_PATH = "data/patches.json";
 const LOCAL_KEY = "earth_local_patch_draft";
+const EARTHQUAKE_FEED = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson";
 
 // SHA-256 of the admin passcode. The plaintext code never appears in this
 // file — unlocking the panel requires hashing the entered value and
 // comparing hashes. This is a UI gate, not real access control: it only
 // keeps casual visitors out of the drafting panel. The thing that
 // actually protects the live site is the GitHub token required to
-// publish, which only people you've granted repo write access can have.
+// publish or delete, which only people you've granted repo write access
+// to will have.
 const ADMIN_HASH = "e224dac2b5ae53b6b711f7fc5d97d0fd16183179ea5f69dfe03b37d94c6c2171";
 
-// Fallback data used only if data/patches.json can't be fetched
-// (e.g. opening the file directly instead of via a server).
+// Fallback used only if data/patches.json can't be fetched (e.g. opening
+// the file directly instead of via a server).
 const DEFAULT_PATCH_GROUPS = [
   {
-    version: "v6.2.1044",
+    version: "v1.0.0",
     date: "Aug 26, 2026",
     entries: [
-      { type: "nerf", title: "Bed bugs", detail: "Nerfed 17%. Regeneration rate reduced, detection radius on mattresses increased. Still too strong, we know." },
-      { type: "nerf", title: "Global intelligence", detail: "Nerfed. Average attention span reduced across all regions. Investigating root cause, likely related to the short-form video exploit patched in v6.1." },
-      { type: "removed", title: "Player 6732", detail: "Remains permanently banned. Ban appeal denied for the fourth time. Reason on file: \"violated at least six terms of service simultaneously.\"" },
-      { type: "buff", title: "Food-borne germs", detail: "Response time to unattended food buffed. Contact window reduced to 3 seconds, down from 5. Kitchen counters most affected." },
-      { type: "nerf", title: "Penguin spawn rate", detail: "Decreased 5% in the Antarctic biome this cycle. Colony devs say it's a \"regional balance pass,\" not a nerf. It's a nerf." },
+      { type: "new", title: "Earth Updates launched", detail: "Patch notes for planet Earth start here." },
     ],
   },
 ];
@@ -57,17 +56,16 @@ const KNOWN_ISSUES = [
 
 const TICKER_ITEMS = [
   "PATCH IS LIVE",
-  "BED BUGS NERFED 17%",
-  "PLAYER 6732 REMAINS BANNED",
   "NO SCHEDULED DOWNTIME",
-  "AURORA RENDERING UPGRADED",
   "REPORT BUGS TO YOUR LOCAL REPRESENTATIVE",
   "NEXT HOTFIX: TBD",
   "SERVER REGION: SOL-3",
   "UPTIME: 4.543 BILLION YEARS",
+  "SEE REAL EVENTS SECTION FOR LIVE USGS DATA",
 ];
 
 let pendingEntries = [];
+let liveGroups = [];
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -113,6 +111,23 @@ function getLocalDraft() {
   }
 }
 
+function updateVersionDisplays(version) {
+  const build = (version || "v1.0.0").replace(/^v/, "");
+  const live = document.getElementById("live-version");
+  const heroBuild = document.getElementById("build-number");
+  const footerBuild = document.getElementById("footer-build");
+  if (live) live.textContent = version;
+  if (heroBuild) heroBuild.textContent = build;
+  if (footerBuild) footerBuild.textContent = build;
+}
+
+function updatePatchCountStat(groups) {
+  const stat = document.getElementById("stat-patches");
+  if (!stat) return;
+  const total = groups.reduce((sum, g) => sum + (g.entries ? g.entries.length : 0), 0);
+  stat.dataset.target = String(total);
+}
+
 async function loadPatchGroups() {
   let groups = DEFAULT_PATCH_GROUPS;
   try {
@@ -121,6 +136,10 @@ async function loadPatchGroups() {
   } catch {
     // stay on fallback data
   }
+
+  liveGroups = groups;
+  updateVersionDisplays(groups[0] && groups[0].version);
+  updatePatchCountStat(groups);
 
   const localDraft = getLocalDraft();
   const rendered = localDraft.length
@@ -147,6 +166,41 @@ function renderIssues() {
   ul.innerHTML = KNOWN_ISSUES.map(i => `<li>${i}</li>`).join("");
 }
 
+async function loadRealEvents() {
+  const container = document.getElementById("real-events-list");
+  try {
+    const res = await fetch(EARTHQUAKE_FEED, { cache: "no-store" });
+    if (!res.ok) throw new Error("feed unavailable");
+    const data = await res.json();
+    const items = (data.features || [])
+      .slice()
+      .sort((a, b) => b.properties.time - a.properties.time)
+      .slice(0, 6);
+
+    if (!items.length) {
+      container.innerHTML = '<p class="admin-empty">No significant seismic events reported this month.</p>';
+      return;
+    }
+
+    container.innerHTML = items.map(f => {
+      const mag = typeof f.properties.mag === "number" ? f.properties.mag.toFixed(1) : "—";
+      const place = escapeHtml(f.properties.place || "Unknown location");
+      const when = new Date(f.properties.time).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+      const url = f.properties.url || "#";
+      return `
+        <a class="real-event" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+          <span class="real-event-mag">M${mag}</span>
+          <span class="real-event-body">
+            <span class="real-event-place">${place}</span>
+            <span class="real-event-time">${when}</span>
+          </span>
+        </a>`;
+    }).join("");
+  } catch {
+    container.innerHTML = '<p class="admin-empty">Live feed unavailable right now — try refreshing.</p>';
+  }
+}
+
 function setupFilters() {
   const bar = document.getElementById("filter-bar");
   bar.addEventListener("click", (e) => {
@@ -168,7 +222,7 @@ function setupFilters() {
 
 function animateStats() {
   const nodes = document.querySelectorAll(".stat-value");
-  const duration = 1600;
+  const duration = 1200;
   const start = performance.now();
   function tick(now) {
     const progress = Math.min(1, (now - start) / duration);
@@ -211,6 +265,40 @@ function bumpVersion(v) {
   return `v${maj}.${min}.${Number(build) + 1}`;
 }
 
+// Shared read/write against data/patches.json via the GitHub Contents API.
+function githubApiUrl() {
+  return `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}`;
+}
+
+async function fetchLiveFile(token) {
+  const res = await fetch(githubApiUrl(), {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+  });
+  if (!res.ok) throw new Error(`Could not read current file (HTTP ${res.status})`);
+  const fileData = await res.json();
+  return { current: JSON.parse(b64DecodeUnicode(fileData.content)), sha: fileData.sha };
+}
+
+async function putLiveFile(token, message, sha, updated) {
+  const res = await fetch(githubApiUrl(), {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message,
+      content: b64EncodeUnicode(JSON.stringify(updated, null, 2)),
+      sha,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Publish failed (HTTP ${res.status})`);
+  }
+}
+
 function renderDraftList() {
   const list = document.getElementById("draft-list");
   if (!pendingEntries.length) {
@@ -232,6 +320,46 @@ function renderDraftList() {
   });
 }
 
+function renderManageList() {
+  const list = document.getElementById("manage-list");
+  if (!liveGroups.length) {
+    list.innerHTML = '<p class="admin-empty">Nothing published yet.</p>';
+    return;
+  }
+  list.innerHTML = liveGroups.map(g => `
+    <div class="manage-item">
+      <div class="manage-info">
+        <span class="manage-version">${escapeHtml(g.version)}</span>
+        <span class="manage-date">${escapeHtml(g.date)}</span>
+      </div>
+      <button type="button" class="manage-delete" data-version="${escapeHtml(g.version)}">Delete</button>
+    </div>
+  `).join("");
+  list.querySelectorAll(".manage-delete").forEach(btn => {
+    btn.addEventListener("click", () => deleteVersion(btn.dataset.version));
+  });
+}
+
+async function deleteVersion(version) {
+  const status = document.getElementById("admin-status");
+  const token = document.getElementById("gh-token").value.trim();
+  if (!token) { status.textContent = "Paste a GitHub token in the field above first."; return; }
+  if (!confirm(`Delete ${version} from the live site? This can't be undone from here.`)) return;
+
+  status.textContent = `Deleting ${version}…`;
+  try {
+    const { current, sha } = await fetchLiveFile(token);
+    const updated = current.filter(g => g.version !== version);
+    await putLiveFile(token, `Remove patch notes: ${version}`, sha, updated);
+    liveGroups = updated;
+    status.textContent = `${version} removed. Live once the site rebuilds (usually under a minute).`;
+    renderManageList();
+    loadPatchGroups();
+  } catch (err) {
+    status.textContent = `Error: ${err.message}`;
+  }
+}
+
 async function publishLive() {
   const status = document.getElementById("admin-status");
   const tokenInput = document.getElementById("gh-token");
@@ -242,40 +370,17 @@ async function publishLive() {
 
   status.textContent = "Publishing…";
   try {
-    const apiUrl = `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}`;
-    const getRes = await fetch(apiUrl, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
-    });
-    if (!getRes.ok) throw new Error(`Could not read current file (HTTP ${getRes.status})`);
-    const fileData = await getRes.json();
-    const current = JSON.parse(b64DecodeUnicode(fileData.content));
-
+    const { current, sha } = await fetchLiveFile(token);
     const nextVersion = bumpVersion(current[0] && current[0].version);
     const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
     const updated = [{ version: nextVersion, date: today, entries: pendingEntries }, ...current];
-
-    const putRes = await fetch(apiUrl, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: `Add patch notes: ${nextVersion}`,
-        content: b64EncodeUnicode(JSON.stringify(updated, null, 2)),
-        sha: fileData.sha,
-      }),
-    });
-    if (!putRes.ok) {
-      const err = await putRes.json().catch(() => ({}));
-      throw new Error(err.message || `Publish failed (HTTP ${putRes.status})`);
-    }
-
+    await putLiveFile(token, `Add patch notes: ${nextVersion}`, sha, updated);
+    liveGroups = updated;
     status.textContent = `Published ${nextVersion}. It'll appear for everyone once the site rebuilds (usually under a minute).`;
     pendingEntries = [];
     tokenInput.value = "";
     renderDraftList();
+    renderManageList();
     loadPatchGroups();
   } catch (err) {
     status.textContent = `Error: ${err.message}`;
@@ -315,6 +420,7 @@ function setupAdmin() {
       errorEl.textContent = "";
       pendingEntries = [];
       renderDraftList();
+      renderManageList();
     } else {
       errorEl.textContent = "Incorrect passcode.";
       passInput.value = "";
@@ -359,4 +465,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilters();
   animateStats();
   setupAdmin();
+  loadRealEvents();
 });
