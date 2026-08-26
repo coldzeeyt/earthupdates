@@ -7,15 +7,13 @@ const ICONS = {
   event: "★",
 };
 
-const DATA_PATH = "data/patches.json";
 const LOCAL_KEY = "earth_local_patch_draft";
 const EARTHQUAKE_FEED = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson";
 
-// Backend that actually holds GitHub write credentials and performs the
-// publish/delete commits (see /server). The browser only ever sends the
-// passcode over HTTPS to this service — it never sees or stores a GitHub
-// token, and the token itself is never present in this file or the page
-// source.
+// Backend (see /server) that stores patch notes on its own persistent
+// volume and handles publish/delete. No GitHub credentials involved
+// anywhere in this flow — the browser only ever sends the passcode over
+// HTTPS to this service.
 const BACKEND_URL = "https://admin-api-production-2fa7.up.railway.app";
 
 // SHA-256 of the admin passcode. The plaintext code never appears in this
@@ -25,8 +23,7 @@ const BACKEND_URL = "https://admin-api-production-2fa7.up.railway.app";
 // the actual access control.
 const ADMIN_HASH = "e224dac2b5ae53b6b711f7fc5d97d0fd16183179ea5f69dfe03b37d94c6c2171";
 
-// Fallback used only if data/patches.json can't be fetched (e.g. opening
-// the file directly instead of via a server).
+// Fallback used only if the backend can't be reached.
 const DEFAULT_PATCH_GROUPS = [
   {
     version: "v1.0.0",
@@ -133,7 +130,7 @@ function updatePatchCountStat(groups) {
 async function loadPatchGroups() {
   let groups = DEFAULT_PATCH_GROUPS;
   try {
-    const res = await fetch(`${DATA_PATH}?v=${Date.now()}`, { cache: "no-store" });
+    const res = await fetch(`${BACKEND_URL}/api/patches?v=${Date.now()}`, { cache: "no-store" });
     if (res.ok) groups = await res.json();
   } catch {
     // stay on fallback data
