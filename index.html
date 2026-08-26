@@ -157,20 +157,15 @@
       <div id="draft-list" class="draft-list"></div>
 
       <div class="admin-publish">
-        <button type="button" class="btn btn-primary btn-block" id="save-local">Save to This Browser</button>
-        <details class="publish-live">
-          <summary>Publish live for all visitors</summary>
-          <p class="admin-note">Requires a GitHub personal access token with write access to this repo. It's used only for this request, never stored or sent anywhere else.</p>
-          <input type="password" id="gh-token" class="modal-input" autocomplete="off" placeholder="GitHub personal access token">
-          <button type="button" class="btn btn-primary btn-block" id="publish-live">Publish to GitHub</button>
-        </details>
+        <button type="button" class="btn btn-primary btn-block" id="publish-live">Publish Live</button>
+        <button type="button" class="btn btn-ghost btn-block" id="save-local">Save Draft to This Browser Only</button>
         <p class="admin-status" id="admin-status"></p>
       </div>
 
       <div class="admin-manage">
         <details class="publish-live">
           <summary>Manage published versions (delete)</summary>
-          <p class="admin-note">Uses the same token above. Deleting a version removes it from the live site for everyone — there's no undo besides re-publishing it.</p>
+          <p class="admin-note">Deleting a version removes it from the live site for everyone — there's no undo besides re-publishing it.</p>
           <div id="manage-list" class="manage-list"></div>
         </details>
       </div>
