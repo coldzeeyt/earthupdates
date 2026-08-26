@@ -7,21 +7,22 @@ const ICONS = {
   event: "★",
 };
 
-// Repo this admin panel publishes to. Only used to build the GitHub API
-// URL for the "publish live" / "delete version" actions below — never
-// sent anywhere else.
-const REPO = "coldzeeyt/earthupdates";
 const DATA_PATH = "data/patches.json";
 const LOCAL_KEY = "earth_local_patch_draft";
 const EARTHQUAKE_FEED = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson";
 
+// Backend that actually holds GitHub write credentials and performs the
+// publish/delete commits (see /server). The browser only ever sends the
+// passcode over HTTPS to this service — it never sees or stores a GitHub
+// token, and the token itself is never present in this file or the page
+// source.
+const BACKEND_URL = "https://earthupdates-admin-api-production.up.railway.app";
+
 // SHA-256 of the admin passcode. The plaintext code never appears in this
 // file — unlocking the panel requires hashing the entered value and
-// comparing hashes. This is a UI gate, not real access control: it only
-// keeps casual visitors out of the drafting panel. The thing that
-// actually protects the live site is the GitHub token required to
-// publish or delete, which only people you've granted repo write access
-// to will have.
+// comparing hashes. This is a fast client-side UX gate only; the backend
+// independently re-checks the passcode before touching the repo, which is
+// the actual access control.
 const ADMIN_HASH = "e224dac2b5ae53b6b711f7fc5d97d0fd16183179ea5f69dfe03b37d94c6c2171";
 
 // Fallback used only if data/patches.json can't be fetched (e.g. opening
@@ -66,6 +67,7 @@ const TICKER_ITEMS = [
 
 let pendingEntries = [];
 let liveGroups = [];
+let adminPasscode = ""; // kept in memory only while the admin panel is open
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -244,61 +246,6 @@ async function sha256Hex(text) {
   return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-function b64DecodeUnicode(b64) {
-  const binary = atob(b64.replace(/\n/g, ""));
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new TextDecoder("utf-8").decode(bytes);
-}
-
-function b64EncodeUnicode(str) {
-  const bytes = new TextEncoder().encode(str);
-  let binary = "";
-  bytes.forEach(b => { binary += String.fromCharCode(b); });
-  return btoa(binary);
-}
-
-function bumpVersion(v) {
-  const match = /^v(\d+)\.(\d+)\.(\d+)$/.exec(v || "");
-  if (!match) return "v1.0.1";
-  const [, maj, min, build] = match;
-  return `v${maj}.${min}.${Number(build) + 1}`;
-}
-
-// Shared read/write against data/patches.json via the GitHub Contents API.
-function githubApiUrl() {
-  return `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}`;
-}
-
-async function fetchLiveFile(token) {
-  const res = await fetch(githubApiUrl(), {
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
-  });
-  if (!res.ok) throw new Error(`Could not read current file (HTTP ${res.status})`);
-  const fileData = await res.json();
-  return { current: JSON.parse(b64DecodeUnicode(fileData.content)), sha: fileData.sha };
-}
-
-async function putLiveFile(token, message, sha, updated) {
-  const res = await fetch(githubApiUrl(), {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message,
-      content: b64EncodeUnicode(JSON.stringify(updated, null, 2)),
-      sha,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Publish failed (HTTP ${res.status})`);
-  }
-}
-
 function renderDraftList() {
   const list = document.getElementById("draft-list");
   if (!pendingEntries.length) {
@@ -342,19 +289,20 @@ function renderManageList() {
 
 async function deleteVersion(version) {
   const status = document.getElementById("admin-status");
-  const token = document.getElementById("gh-token").value.trim();
-  if (!token) { status.textContent = "Paste a GitHub token in the field above first."; return; }
   if (!confirm(`Delete ${version} from the live site? This can't be undone from here.`)) return;
 
   status.textContent = `Deleting ${version}…`;
   try {
-    const { current, sha } = await fetchLiveFile(token);
-    const updated = current.filter(g => g.version !== version);
-    await putLiveFile(token, `Remove patch notes: ${version}`, sha, updated);
-    liveGroups = updated;
+    const res = await fetch(`${BACKEND_URL}/api/delete-version`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passcode: adminPasscode, version }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Delete failed (HTTP ${res.status})`);
     status.textContent = `${version} removed. Live once the site rebuilds (usually under a minute).`;
+    await loadPatchGroups();
     renderManageList();
-    loadPatchGroups();
   } catch (err) {
     status.textContent = `Error: ${err.message}`;
   }
@@ -362,26 +310,22 @@ async function deleteVersion(version) {
 
 async function publishLive() {
   const status = document.getElementById("admin-status");
-  const tokenInput = document.getElementById("gh-token");
-  const token = tokenInput.value.trim();
-
   if (!pendingEntries.length) { status.textContent = "Add at least one entry first."; return; }
-  if (!token) { status.textContent = "Paste a GitHub token first."; return; }
 
   status.textContent = "Publishing…";
   try {
-    const { current, sha } = await fetchLiveFile(token);
-    const nextVersion = bumpVersion(current[0] && current[0].version);
-    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    const updated = [{ version: nextVersion, date: today, entries: pendingEntries }, ...current];
-    await putLiveFile(token, `Add patch notes: ${nextVersion}`, sha, updated);
-    liveGroups = updated;
-    status.textContent = `Published ${nextVersion}. It'll appear for everyone once the site rebuilds (usually under a minute).`;
+    const res = await fetch(`${BACKEND_URL}/api/publish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passcode: adminPasscode, entries: pendingEntries }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Publish failed (HTTP ${res.status})`);
+    status.textContent = `Published ${data.version}. It'll appear for everyone once the site rebuilds (usually under a minute).`;
     pendingEntries = [];
-    tokenInput.value = "";
     renderDraftList();
+    await loadPatchGroups();
     renderManageList();
-    loadPatchGroups();
   } catch (err) {
     status.textContent = `Error: ${err.message}`;
   }
@@ -405,7 +349,10 @@ function setupAdmin() {
     panel.classList.add("hidden-entry");
     setTimeout(() => passInput.focus(), 50);
   }
-  function closeModal() { overlay.classList.remove("open"); }
+  function closeModal() {
+    overlay.classList.remove("open");
+    adminPasscode = "";
+  }
 
   openBtn.addEventListener("click", openModal);
   closeBtn.addEventListener("click", closeModal);
@@ -413,8 +360,10 @@ function setupAdmin() {
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
 
   async function tryUnlock() {
-    const hash = await sha256Hex(passInput.value.trim());
+    const value = passInput.value.trim();
+    const hash = await sha256Hex(value);
     if (hash === ADMIN_HASH) {
+      adminPasscode = value;
       gate.classList.add("hidden-entry");
       panel.classList.remove("hidden-entry");
       errorEl.textContent = "";
