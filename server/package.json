@@ -2,7 +2,7 @@
   "name": "earthupdates-admin-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Passcode-gated backend that publishes patch notes to data/patches.json in the earthupdates repo, holding the GitHub write token server-side.",
+  "description": "Passcode-gated backend that stores Earth Updates patch notes on a persistent Railway volume.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
