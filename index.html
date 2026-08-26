@@ -106,8 +106,62 @@
     <div class="footer-brand">🌍 EARTH<span class="brand-sub">™</span></div>
     <p>Earth Studios — a subsidiary of nobody in particular. Not responsible for emergent behavior, unpatched exploits, or extinction-tier balance changes. All uptime figures self-reported.</p>
     <p class="footer-meta">Build <span id="footer-build">6.2.1044</span> &middot; Region: Sol-3 &middot; No refunds.</p>
+    <button type="button" class="admin-link" id="admin-open">Admin</button>
   </div>
 </footer>
+
+<div class="modal-overlay" id="admin-overlay">
+  <div class="modal">
+    <button type="button" class="modal-close" id="admin-close" aria-label="Close">&times;</button>
+
+    <div id="admin-gate">
+      <h3 class="modal-title">Admin Access</h3>
+      <p class="modal-sub">Enter the passcode to draft new patch notes.</p>
+      <input type="password" id="admin-passcode" class="modal-input" inputmode="numeric" autocomplete="off" placeholder="Passcode">
+      <button type="button" class="btn btn-primary btn-block" id="admin-unlock">Unlock</button>
+      <p class="admin-error" id="admin-error"></p>
+    </div>
+
+    <div id="admin-panel" class="hidden-entry">
+      <h3 class="modal-title">Draft a Patch Entry</h3>
+      <form id="admin-form" class="admin-form">
+        <div class="admin-row">
+          <label for="f-type">Type</label>
+          <select id="f-type">
+            <option value="buff">Buff</option>
+            <option value="nerf">Nerf</option>
+            <option value="new">New</option>
+            <option value="fix">Fix</option>
+            <option value="removed">Removed</option>
+            <option value="event">Event</option>
+          </select>
+        </div>
+        <div class="admin-row">
+          <label for="f-title">Title</label>
+          <input type="text" id="f-title" placeholder="e.g. Gravity" required>
+        </div>
+        <div class="admin-row">
+          <label for="f-detail">Detail</label>
+          <textarea id="f-detail" rows="3" placeholder="Patch note description..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-ghost btn-block">Add to Draft</button>
+      </form>
+
+      <div id="draft-list" class="draft-list"></div>
+
+      <div class="admin-publish">
+        <button type="button" class="btn btn-primary btn-block" id="save-local">Save to This Browser</button>
+        <details class="publish-live">
+          <summary>Publish live for all visitors</summary>
+          <p class="admin-note">Requires a GitHub personal access token with write access to this repo. It's used only for this request, never stored or sent anywhere else.</p>
+          <input type="password" id="gh-token" class="modal-input" autocomplete="off" placeholder="GitHub personal access token">
+          <button type="button" class="btn btn-primary btn-block" id="publish-live">Publish to GitHub</button>
+        </details>
+        <p class="admin-status" id="admin-status"></p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>

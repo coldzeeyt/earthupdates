@@ -7,7 +7,23 @@ const ICONS = {
   event: "★",
 };
 
-const PATCH_GROUPS = [
+// Repo this admin panel publishes to. Only used to build the GitHub API
+// URL for the "publish live" action below — never sent anywhere else.
+const REPO = "coldzeeyt/earthupdates";
+const DATA_PATH = "data/patches.json";
+const LOCAL_KEY = "earth_local_patch_draft";
+
+// SHA-256 of the admin passcode. The plaintext code never appears in this
+// file — unlocking the panel requires hashing the entered value and
+// comparing hashes. This is a UI gate, not real access control: it only
+// keeps casual visitors out of the drafting panel. The thing that
+// actually protects the live site is the GitHub token required to
+// publish, which only people you've granted repo write access can have.
+const ADMIN_HASH = "e224dac2b5ae53b6b711f7fc5d97d0fd16183179ea5f69dfe03b37d94c6c2171";
+
+// Fallback data used only if data/patches.json can't be fetched
+// (e.g. opening the file directly instead of via a server).
+const DEFAULT_PATCH_GROUPS = [
   {
     version: "v6.2.1044",
     date: "Aug 26, 2026",
@@ -17,77 +33,6 @@ const PATCH_GROUPS = [
       { type: "removed", title: "Player 6732", detail: "Remains permanently banned. Ban appeal denied for the fourth time. Reason on file: \"violated at least six terms of service simultaneously.\"" },
       { type: "buff", title: "Food-borne germs", detail: "Response time to unattended food buffed. Contact window reduced to 3 seconds, down from 5. Kitchen counters most affected." },
       { type: "nerf", title: "Penguin spawn rate", detail: "Decreased 5% in the Antarctic biome this cycle. Colony devs say it's a \"regional balance pass,\" not a nerf. It's a nerf." },
-    ],
-  },
-  {
-    version: "v6.1.998",
-    date: "Aug 12, 2026",
-    entries: [
-      { type: "new", title: "Aurora rendering upgrade", detail: "Northern and southern lights now render at higher fidelity during solar storm events. Best viewed above 55° latitude, weather permitting." },
-      { type: "fix", title: "Migratory bird pathing", detail: "Fixed a bug where several species were routing through active runways. Navigation mesh rebaked." },
-      { type: "nerf", title: "Mosquitoes", detail: "Buzzing frequency increased by mistake in a hotfix two builds ago. Reverted. You're welcome." },
-      { type: "event", title: "Perseid meteor shower", detail: "Limited-time event live now through Aug 24. Peak spawn rate around 2 AM local time. No cooldown, first come first served." },
-    ],
-  },
-  {
-    version: "v6.0.912",
-    date: "Jul 29, 2026",
-    entries: [
-      { type: "buff", title: "Coral reef regeneration", detail: "Recovery rate buffed in three marine zones following a sustained cooldown period. Still fragile — please stop standing on it." },
-      { type: "nerf", title: "Heatwaves, Northern Hemisphere", detail: "Intensity increased for the third patch in a row. Multiple bug reports filed as feedback. Devs aware, no fix scheduled." },
-      { type: "new", title: "Bioluminescent plankton bloom", detail: "New seasonal visual effect added to select coastlines at night. Triggered by wave disturbance." },
-      { type: "fix", title: "Tectonic plate desync", detail: "Patched a minor desync along a fault line that was causing inconsistent tremor readings. No major shifts expected this build." },
-      { type: "removed", title: "That one square of ozone", detail: "Fully restored, actually — removing it from the known issues list after 30 years open. Nice work, everyone who filed a report." },
-    ],
-  },
-  {
-    version: "v5.9.844",
-    date: "Jul 14, 2026",
-    entries: [
-      { type: "nerf", title: "Human patience, in traffic", detail: "Reduced further. Working as intended per design doc, apparently." },
-      { type: "buff", title: "Golden hour lighting", detail: "Global lighting engine tuned. Sunsets now last approximately 4% longer in clear-sky conditions." },
-      { type: "new", title: "Rare double rainbow event", detail: "Spawn conditions loosened slightly after sun-shower weather. Still uncommon, still not guaranteed." },
-      { type: "event", title: "Cicada emergence, Brood cluster", detail: "17-year timer expired. Full spawn event active in affected regions through late summer. Loud." },
-    ],
-  },
-  {
-    version: "v5.8.771",
-    date: "Jun 30, 2026",
-    entries: [
-      { type: "fix", title: "Monsoon season timing", detail: "Corrected a scheduling bug causing onset to drift. Should now align with historical patch cadence." },
-      { type: "nerf", title: "Glacier mass, global average", detail: "Continued decline this patch. Long-running balance issue, no hotfix planned — this is a core systems problem, not a bug." },
-      { type: "buff", title: "Beekeeper population", detail: "Slight uptick in active players this season. Hive health metrics trending positive in three regions." },
-      { type: "new", title: "Wildflower super-bloom", detail: "One-time seasonal spawn triggered by ideal winter rainfall. Desert biomes only. Screenshots encouraged." },
-    ],
-  },
-  {
-    version: "v5.7.702",
-    date: "Jun 9, 2026",
-    entries: [
-      { type: "nerf", title: "Group chat notification spam", detail: "Not an Earth-side patch, but we're getting blamed for it anyway. Escalated to the platform team." },
-      { type: "buff", title: "Sourdough starter viability", detail: "Ambient yeast strains buffed slightly. Should be more forgiving for new players this patch." },
-      { type: "removed", title: "Leap second", detail: "Skipped this cycle due to rotational speed drift. Timekeeping team says it's fine. It's probably fine." },
-      { type: "fix", title: "Firefly sync timing", detail: "Patched flash synchronization bug in select Southeast Asian regions. Should look less chaotic now." },
-    ],
-  },
-  {
-    version: "v5.6.633",
-    date: "May 22, 2026",
-    entries: [
-      { type: "new", title: "New volcanic island", detail: "Small landmass added via underwater eruption in the South Pacific. Currently uninhabited. Claim rights TBD." },
-      { type: "nerf", title: "Allergy season", detail: "Pollen count buffed — sorry, that's a typo in last patch's notes, it was in fact nerfed against players. Apologies for the confusion." },
-      { type: "buff", title: "Whale song range", detail: "Acoustic propagation distance increased following a background noise pass in shipping lanes." },
-      { type: "event", title: "Total solar eclipse", detail: "Path of totality event scheduled and delivered on time. Attendance metrics exceeded projections." },
-    ],
-  },
-  {
-    version: "v5.5.560",
-    date: "May 3, 2026",
-    entries: [
-      { type: "fix", title: "River delta erosion rate", detail: "Corrected an edge case causing accelerated sediment loss in two major deltas." },
-      { type: "nerf", title: "Standing in line at the DMV", detail: "Wait time balance pass. Not technically an Earth-engine issue but morale team asked us to acknowledge it." },
-      { type: "buff", title: "Songbird dawn chorus", detail: "Volume and variety buffed in temperate zones as breeding season ramped up." },
-      { type: "new", title: "Bioluminescent fungi patch", detail: "New rare spawn added to a handful of forest biomes. Only visible at night, low light required." },
     ],
   },
 ];
@@ -111,7 +56,7 @@ const KNOWN_ISSUES = [
 ];
 
 const TICKER_ITEMS = [
-  "PATCH v6.2.1044 IS LIVE",
+  "PATCH IS LIVE",
   "BED BUGS NERFED 17%",
   "PLAYER 6732 REMAINS BANNED",
   "NO SCHEDULED DOWNTIME",
@@ -122,29 +67,37 @@ const TICKER_ITEMS = [
   "UPTIME: 4.543 BILLION YEARS",
 ];
 
+let pendingEntries = [];
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
 function renderTicker() {
   const track = document.getElementById("ticker-track");
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
-  track.innerHTML = items.map(t => `<span>${t}</span>`).join('<span style="color:var(--accent)"> &nbsp;//&nbsp; </span>');
+  track.innerHTML = items.map(t => `<span>${escapeHtml(t)}</span>`).join('<span style="color:var(--accent)"> &nbsp;//&nbsp; </span>');
 }
 
-function renderPatches() {
+function renderPatches(groups) {
   const list = document.getElementById("patch-list");
-  list.innerHTML = PATCH_GROUPS.map(group => `
-    <div class="patch-group">
+  list.innerHTML = groups.map(group => `
+    <div class="patch-group${group.isDraft ? " patch-group-draft" : ""}">
       <div class="patch-group-header">
-        <span class="patch-version">${group.version}</span>
-        <span class="patch-date">${group.date}</span>
+        <span class="patch-version">${escapeHtml(group.version)}</span>
+        <span class="patch-date">${escapeHtml(group.date)}</span>
       </div>
       ${group.entries.map(e => `
-        <div class="patch-entry" data-type="${e.type}">
-          <div class="patch-icon" style="color:var(--${e.type})">${ICONS[e.type]}</div>
+        <div class="patch-entry" data-type="${escapeHtml(e.type)}">
+          <div class="patch-icon" style="color:var(--${e.type})">${ICONS[e.type] || "•"}</div>
           <div>
             <div class="patch-title">
-              ${e.title}
-              <span class="tag tag-${e.type}">${e.type}</span>
+              ${escapeHtml(e.title)}
+              <span class="tag tag-${escapeHtml(e.type)}">${escapeHtml(e.type)}</span>
             </div>
-            <div class="patch-desc">${e.detail}</div>
+            <div class="patch-desc">${escapeHtml(e.detail)}</div>
           </div>
         </div>
       `).join("")}
@@ -152,13 +105,39 @@ function renderPatches() {
   `).join("");
 }
 
+function getLocalDraft() {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+async function loadPatchGroups() {
+  let groups = DEFAULT_PATCH_GROUPS;
+  try {
+    const res = await fetch(`${DATA_PATH}?v=${Date.now()}`, { cache: "no-store" });
+    if (res.ok) groups = await res.json();
+  } catch {
+    // stay on fallback data
+  }
+
+  const localDraft = getLocalDraft();
+  const rendered = localDraft.length
+    ? [{ version: "UNPUBLISHED DRAFT", date: "saved in this browser only", entries: localDraft, isDraft: true }, ...groups]
+    : groups;
+
+  renderPatches(rendered);
+  return groups;
+}
+
 function renderRoadmap() {
   const grid = document.getElementById("roadmap-grid");
   grid.innerHTML = ROADMAP.map(r => `
     <div class="roadmap-card">
-      <span class="roadmap-status">${r.status}</span>
-      <h3>${r.title}</h3>
-      <p>${r.detail}</p>
+      <span class="roadmap-status">${escapeHtml(r.status)}</span>
+      <h3>${escapeHtml(r.title)}</h3>
+      <p>${escapeHtml(r.detail)}</p>
     </div>
   `).join("");
 }
@@ -205,11 +184,179 @@ function animateStats() {
   requestAnimationFrame(tick);
 }
 
+async function sha256Hex(text) {
+  const bytes = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function b64DecodeUnicode(b64) {
+  const binary = atob(b64.replace(/\n/g, ""));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+function b64EncodeUnicode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = "";
+  bytes.forEach(b => { binary += String.fromCharCode(b); });
+  return btoa(binary);
+}
+
+function bumpVersion(v) {
+  const match = /^v(\d+)\.(\d+)\.(\d+)$/.exec(v || "");
+  if (!match) return "v1.0.1";
+  const [, maj, min, build] = match;
+  return `v${maj}.${min}.${Number(build) + 1}`;
+}
+
+function renderDraftList() {
+  const list = document.getElementById("draft-list");
+  if (!pendingEntries.length) {
+    list.innerHTML = '<p class="admin-empty">No entries staged yet. Add one above.</p>';
+    return;
+  }
+  list.innerHTML = pendingEntries.map((e, i) => `
+    <div class="draft-item">
+      <span class="tag tag-${escapeHtml(e.type)}">${escapeHtml(e.type)}</span>
+      <span class="draft-title">${escapeHtml(e.title)}</span>
+      <button type="button" class="draft-remove" data-index="${i}">Remove</button>
+    </div>
+  `).join("");
+  list.querySelectorAll(".draft-remove").forEach(btn => {
+    btn.addEventListener("click", () => {
+      pendingEntries.splice(Number(btn.dataset.index), 1);
+      renderDraftList();
+    });
+  });
+}
+
+async function publishLive() {
+  const status = document.getElementById("admin-status");
+  const tokenInput = document.getElementById("gh-token");
+  const token = tokenInput.value.trim();
+
+  if (!pendingEntries.length) { status.textContent = "Add at least one entry first."; return; }
+  if (!token) { status.textContent = "Paste a GitHub token first."; return; }
+
+  status.textContent = "Publishing…";
+  try {
+    const apiUrl = `https://api.github.com/repos/${REPO}/contents/${DATA_PATH}`;
+    const getRes = await fetch(apiUrl, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+    });
+    if (!getRes.ok) throw new Error(`Could not read current file (HTTP ${getRes.status})`);
+    const fileData = await getRes.json();
+    const current = JSON.parse(b64DecodeUnicode(fileData.content));
+
+    const nextVersion = bumpVersion(current[0] && current[0].version);
+    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const updated = [{ version: nextVersion, date: today, entries: pendingEntries }, ...current];
+
+    const putRes = await fetch(apiUrl, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: `Add patch notes: ${nextVersion}`,
+        content: b64EncodeUnicode(JSON.stringify(updated, null, 2)),
+        sha: fileData.sha,
+      }),
+    });
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      throw new Error(err.message || `Publish failed (HTTP ${putRes.status})`);
+    }
+
+    status.textContent = `Published ${nextVersion}. It'll appear for everyone once the site rebuilds (usually under a minute).`;
+    pendingEntries = [];
+    tokenInput.value = "";
+    renderDraftList();
+    loadPatchGroups();
+  } catch (err) {
+    status.textContent = `Error: ${err.message}`;
+  }
+}
+
+function setupAdmin() {
+  const overlay = document.getElementById("admin-overlay");
+  const openBtn = document.getElementById("admin-open");
+  const closeBtn = document.getElementById("admin-close");
+  const gate = document.getElementById("admin-gate");
+  const panel = document.getElementById("admin-panel");
+  const passInput = document.getElementById("admin-passcode");
+  const unlockBtn = document.getElementById("admin-unlock");
+  const errorEl = document.getElementById("admin-error");
+
+  function openModal() {
+    overlay.classList.add("open");
+    passInput.value = "";
+    errorEl.textContent = "";
+    gate.classList.remove("hidden-entry");
+    panel.classList.add("hidden-entry");
+    setTimeout(() => passInput.focus(), 50);
+  }
+  function closeModal() { overlay.classList.remove("open"); }
+
+  openBtn.addEventListener("click", openModal);
+  closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+  async function tryUnlock() {
+    const hash = await sha256Hex(passInput.value.trim());
+    if (hash === ADMIN_HASH) {
+      gate.classList.add("hidden-entry");
+      panel.classList.remove("hidden-entry");
+      errorEl.textContent = "";
+      pendingEntries = [];
+      renderDraftList();
+    } else {
+      errorEl.textContent = "Incorrect passcode.";
+      passInput.value = "";
+      passInput.focus();
+    }
+  }
+  unlockBtn.addEventListener("click", tryUnlock);
+  passInput.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
+
+  document.getElementById("admin-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const type = document.getElementById("f-type").value;
+    const title = document.getElementById("f-title").value.trim();
+    const detail = document.getElementById("f-detail").value.trim();
+    if (!title || !detail) return;
+    pendingEntries.push({ type, title, detail });
+    e.target.reset();
+    renderDraftList();
+  });
+
+  document.getElementById("save-local").addEventListener("click", () => {
+    if (!pendingEntries.length) {
+      document.getElementById("admin-status").textContent = "Add at least one entry first.";
+      return;
+    }
+    const existing = getLocalDraft();
+    localStorage.setItem(LOCAL_KEY, JSON.stringify([...existing, ...pendingEntries]));
+    pendingEntries = [];
+    renderDraftList();
+    document.getElementById("admin-status").textContent = "Saved — visible only in this browser until published live.";
+    loadPatchGroups();
+  });
+
+  document.getElementById("publish-live").addEventListener("click", publishLive);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   renderTicker();
-  renderPatches();
+  loadPatchGroups();
   renderRoadmap();
   renderIssues();
   setupFilters();
   animateStats();
+  setupAdmin();
 });

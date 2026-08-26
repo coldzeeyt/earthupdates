@@ -391,6 +391,152 @@ ul { list-style: none; }
 .footer-inner p { max-width: 520px; margin: 0 auto; color: var(--text-faint); font-size: 0.8rem; line-height: 1.6; }
 .footer-meta { margin-top: 10px; font-family: var(--font-mono); }
 
+/* ---------- admin link ---------- */
+.admin-link {
+  margin-top: 18px;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 4px 10px;
+  opacity: 0.6;
+  transition: opacity 0.15s, color 0.15s;
+}
+.admin-link:hover { opacity: 1; color: var(--accent); }
+
+/* ---------- admin modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 6, 9, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6);
+}
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.modal-close:hover { color: var(--text); }
+.modal-title { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 6px; }
+.modal-sub { color: var(--text-dim); font-size: 0.86rem; margin-bottom: 20px; }
+.modal-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 11px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.modal-input:focus { border-color: var(--accent); }
+.btn-block { width: 100%; text-align: center; border: 1px solid transparent; cursor: pointer; }
+.btn-ghost.btn-block { border-color: var(--panel-border); background: none; }
+.admin-error { color: var(--nerf); font-size: 0.82rem; min-height: 1.2em; margin-top: 4px; }
+
+.admin-form { margin-top: 4px; }
+.admin-row { margin-bottom: 14px; }
+.admin-row label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.admin-row input,
+.admin-row select,
+.admin-row textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+.admin-row input:focus,
+.admin-row select:focus,
+.admin-row textarea:focus { border-color: var(--accent); }
+
+.draft-list { margin: 18px 0; display: flex; flex-direction: column; gap: 8px; }
+.admin-empty { color: var(--text-faint); font-size: 0.84rem; }
+.draft-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.draft-title { flex: 1; font-size: 0.86rem; }
+.draft-remove {
+  background: none;
+  border: none;
+  color: var(--nerf);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.draft-remove:hover { text-decoration: underline; }
+
+.admin-publish { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 12px; }
+.publish-live summary {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+.publish-live summary:hover { color: var(--text); }
+.publish-live[open] summary { color: var(--accent); margin-bottom: 10px; }
+.admin-note { color: var(--text-faint); font-size: 0.78rem; line-height: 1.5; margin-bottom: 10px; }
+.admin-status { font-size: 0.82rem; color: var(--text-dim); min-height: 1.2em; }
+
+.patch-group-draft .patch-group-header { border-bottom-color: var(--event); }
+.patch-group-draft .patch-version { color: var(--event); }
+
 @media (max-width: 640px) {
   .topnav { display: none; }
   .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 30px; }
