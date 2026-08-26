@@ -198,12 +198,20 @@ ul { list-style: none; }
 /* ---------- stats ---------- */
 .stats { padding: 50px 24px; border-bottom: 1px solid var(--panel-border); }
 .stats-inner {
-  max-width: 1000px;
+  max-width: 760px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   text-align: center;
+}
+.stats-footnote {
+  max-width: 560px;
+  margin: 22px auto 0;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.76rem;
+  line-height: 1.6;
 }
 .stat-value {
   font-family: var(--font-mono);
@@ -381,6 +389,45 @@ ul { list-style: none; }
 }
 .issues-list li b { color: var(--text); font-weight: 600; }
 
+/* ---------- real events ---------- */
+.real-events { padding: 0 24px 30px; }
+.real-events-list {
+  max-width: 760px;
+  margin: 34px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.real-event {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--event);
+  border-radius: 6px;
+  padding: 12px 16px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.real-event:hover { border-color: var(--event); transform: translateX(2px); }
+.real-event-mag {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--event);
+  min-width: 44px;
+}
+.real-event-body { display: flex; flex-direction: column; gap: 2px; }
+.real-event-place { font-size: 0.88rem; color: var(--text); }
+.real-event-time { font-size: 0.76rem; color: var(--text-faint); font-family: var(--font-mono); }
+.real-events-credit {
+  max-width: 560px;
+  margin: 18px auto 0;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.76rem;
+}
+
 /* ---------- footer ---------- */
 .site-footer {
   border-top: 1px solid var(--panel-border);
@@ -536,6 +583,32 @@ ul { list-style: none; }
 
 .patch-group-draft .patch-group-header { border-bottom-color: var(--event); }
 .patch-group-draft .patch-version { color: var(--event); }
+
+.admin-manage { margin-top: 16px; }
+.manage-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.manage-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.manage-info { flex: 1; }
+.manage-version { font-family: var(--font-mono); font-size: 0.84rem; }
+.manage-date { font-size: 0.74rem; color: var(--text-faint); margin-left: 6px; }
+.manage-delete {
+  background: none;
+  border: 1px solid var(--nerf);
+  color: var(--nerf);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.manage-delete:hover { background: rgba(255, 84, 112, 0.12); }
 
 @media (max-width: 640px) {
   .topnav { display: none; }

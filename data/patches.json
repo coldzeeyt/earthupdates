@@ -1,84 +1,9 @@
 [
   {
-    "version": "v6.2.1044",
+    "version": "v1.0.0",
     "date": "Aug 26, 2026",
     "entries": [
-      { "type": "nerf", "title": "Bed bugs", "detail": "Nerfed 17%. Regeneration rate reduced, detection radius on mattresses increased. Still too strong, we know." },
-      { "type": "nerf", "title": "Global intelligence", "detail": "Nerfed. Average attention span reduced across all regions. Investigating root cause, likely related to the short-form video exploit patched in v6.1." },
-      { "type": "removed", "title": "Player 6732", "detail": "Remains permanently banned. Ban appeal denied for the fourth time. Reason on file: \"violated at least six terms of service simultaneously.\"" },
-      { "type": "buff", "title": "Food-borne germs", "detail": "Response time to unattended food buffed. Contact window reduced to 3 seconds, down from 5. Kitchen counters most affected." },
-      { "type": "nerf", "title": "Penguin spawn rate", "detail": "Decreased 5% in the Antarctic biome this cycle. Colony devs say it's a \"regional balance pass,\" not a nerf. It's a nerf." }
-    ]
-  },
-  {
-    "version": "v6.1.998",
-    "date": "Aug 12, 2026",
-    "entries": [
-      { "type": "new", "title": "Aurora rendering upgrade", "detail": "Northern and southern lights now render at higher fidelity during solar storm events. Best viewed above 55° latitude, weather permitting." },
-      { "type": "fix", "title": "Migratory bird pathing", "detail": "Fixed a bug where several species were routing through active runways. Navigation mesh rebaked." },
-      { "type": "nerf", "title": "Mosquitoes", "detail": "Buzzing frequency increased by mistake in a hotfix two builds ago. Reverted. You're welcome." },
-      { "type": "event", "title": "Perseid meteor shower", "detail": "Limited-time event live now through Aug 24. Peak spawn rate around 2 AM local time. No cooldown, first come first served." }
-    ]
-  },
-  {
-    "version": "v6.0.912",
-    "date": "Jul 29, 2026",
-    "entries": [
-      { "type": "buff", "title": "Coral reef regeneration", "detail": "Recovery rate buffed in three marine zones following a sustained cooldown period. Still fragile — please stop standing on it." },
-      { "type": "nerf", "title": "Heatwaves, Northern Hemisphere", "detail": "Intensity increased for the third patch in a row. Multiple bug reports filed as feedback. Devs aware, no fix scheduled." },
-      { "type": "new", "title": "Bioluminescent plankton bloom", "detail": "New seasonal visual effect added to select coastlines at night. Triggered by wave disturbance." },
-      { "type": "fix", "title": "Tectonic plate desync", "detail": "Patched a minor desync along a fault line that was causing inconsistent tremor readings. No major shifts expected this build." },
-      { "type": "removed", "title": "That one square of ozone", "detail": "Fully restored, actually — removing it from the known issues list after 30 years open. Nice work, everyone who filed a report." }
-    ]
-  },
-  {
-    "version": "v5.9.844",
-    "date": "Jul 14, 2026",
-    "entries": [
-      { "type": "nerf", "title": "Human patience, in traffic", "detail": "Reduced further. Working as intended per design doc, apparently." },
-      { "type": "buff", "title": "Golden hour lighting", "detail": "Global lighting engine tuned. Sunsets now last approximately 4% longer in clear-sky conditions." },
-      { "type": "new", "title": "Rare double rainbow event", "detail": "Spawn conditions loosened slightly after sun-shower weather. Still uncommon, still not guaranteed." },
-      { "type": "event", "title": "Cicada emergence, Brood cluster", "detail": "17-year timer expired. Full spawn event active in affected regions through late summer. Loud." }
-    ]
-  },
-  {
-    "version": "v5.8.771",
-    "date": "Jun 30, 2026",
-    "entries": [
-      { "type": "fix", "title": "Monsoon season timing", "detail": "Corrected a scheduling bug causing onset to drift. Should now align with historical patch cadence." },
-      { "type": "nerf", "title": "Glacier mass, global average", "detail": "Continued decline this patch. Long-running balance issue, no hotfix planned — this is a core systems problem, not a bug." },
-      { "type": "buff", "title": "Beekeeper population", "detail": "Slight uptick in active players this season. Hive health metrics trending positive in three regions." },
-      { "type": "new", "title": "Wildflower super-bloom", "detail": "One-time seasonal spawn triggered by ideal winter rainfall. Desert biomes only. Screenshots encouraged." }
-    ]
-  },
-  {
-    "version": "v5.7.702",
-    "date": "Jun 9, 2026",
-    "entries": [
-      { "type": "nerf", "title": "Group chat notification spam", "detail": "Not an Earth-side patch, but we're getting blamed for it anyway. Escalated to the platform team." },
-      { "type": "buff", "title": "Sourdough starter viability", "detail": "Ambient yeast strains buffed slightly. Should be more forgiving for new players this patch." },
-      { "type": "removed", "title": "Leap second", "detail": "Skipped this cycle due to rotational speed drift. Timekeeping team says it's fine. It's probably fine." },
-      { "type": "fix", "title": "Firefly sync timing", "detail": "Patched flash synchronization bug in select Southeast Asian regions. Should look less chaotic now." }
-    ]
-  },
-  {
-    "version": "v5.6.633",
-    "date": "May 22, 2026",
-    "entries": [
-      { "type": "new", "title": "New volcanic island", "detail": "Small landmass added via underwater eruption in the South Pacific. Currently uninhabited. Claim rights TBD." },
-      { "type": "nerf", "title": "Allergy season", "detail": "Pollen count buffed — sorry, that's a typo in last patch's notes, it was in fact nerfed against players. Apologies for the confusion." },
-      { "type": "buff", "title": "Whale song range", "detail": "Acoustic propagation distance increased following a background noise pass in shipping lanes." },
-      { "type": "event", "title": "Total solar eclipse", "detail": "Path of totality event scheduled and delivered on time. Attendance metrics exceeded projections." }
-    ]
-  },
-  {
-    "version": "v5.5.560",
-    "date": "May 3, 2026",
-    "entries": [
-      { "type": "fix", "title": "River delta erosion rate", "detail": "Corrected an edge case causing accelerated sediment loss in two major deltas." },
-      { "type": "nerf", "title": "Standing in line at the DMV", "detail": "Wait time balance pass. Not technically an Earth-engine issue but morale team asked us to acknowledge it." },
-      { "type": "buff", "title": "Songbird dawn chorus", "detail": "Volume and variety buffed in temperate zones as breeding season ramped up." },
-      { "type": "new", "title": "Bioluminescent fungi patch", "detail": "New rare spawn added to a handful of forest biomes. Only visible at night, low light required." }
+      { "type": "new", "title": "Earth Updates launched", "detail": "Patch notes for planet Earth start here. Use the admin panel to publish the first real update." }
     ]
   }
 ]
