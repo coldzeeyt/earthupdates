@@ -16,7 +16,7 @@ const EARTHQUAKE_FEED = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summa
 // passcode over HTTPS to this service — it never sees or stores a GitHub
 // token, and the token itself is never present in this file or the page
 // source.
-const BACKEND_URL = "https://earthupdates-admin-api-production.up.railway.app";
+const BACKEND_URL = "https://admin-api-production-f80f.up.railway.app";
 
 // SHA-256 of the admin passcode. The plaintext code never appears in this
 // file — unlocking the panel requires hashing the entered value and
